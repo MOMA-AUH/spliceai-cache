@@ -10,7 +10,7 @@ name = "spliceai-cache"
 version = "0.1.0"
 description = "SQLite-backed cache for reusable SpliceAI VCF annotations"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 dependencies = [
     "pysam>=0.24.1",
     "sqlalchemy>=2.0.50",
@@ -29,6 +29,5 @@ members = [
 
 [dependency-groups]
 dev = [
-    "ipykernel>=7.2.0",
     "pytest>=8.0.0",
 ]
