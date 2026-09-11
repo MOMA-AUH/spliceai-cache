@@ -28,7 +28,7 @@ requirements:
 
 test:
   imports:
-    - spliceai-cache
+    - spliceai_cache
   commands:
     - pip check
     - spliceai-cache --help
