@@ -8,7 +8,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import SQLModel
 
 from . import db  # noqa: F401
-from .utilities import extract_vcf, ingest_vcf, sqlite_engine
+from .utilities import sqlite_engine
+from .vcf import extract_vcf, ingest_vcf
 
 app = typer.Typer(
     no_args_is_help=True,
