@@ -1,0 +1,42 @@
+{% set name = "spliceai-cache" %}
+{% set version = "0.1.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  path: ..
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv
+
+requirements:
+  host:
+    - python >=3.10,<3.14
+    - pip
+    - hatchling
+    - wheel
+  run:
+    - pysam >=0.24.1
+    - sqlalchemy >=2.0.50
+    - sqlalchemy-utils >=0.42.1
+    - sqlmodel >=0.0.38
+    - typer >=0.15.0
+
+test:
+  imports:
+    - spliceai-cache
+  commands:
+    - pip check
+    - spliceai-cache --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/MOMA-AUH/spliceai-cache
+  summary: SQLite-backed cache for reusable SpliceAI VCF annotations
+  license: MIT
+  license_file: LICENSE
