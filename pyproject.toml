@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["spliceai_cache"]
+
+[project]
+name = "spliceai-cache"
+version = "0.1.0"
+description = "SQLite-backed cache for reusable SpliceAI VCF annotations"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pysam>=0.24.1",
+    "sqlalchemy>=2.0.50",
+    "sqlalchemy-utils>=0.42.1",
+    "sqlmodel>=0.0.38",
+    "typer>=0.15.0",
+]
+
+[project.scripts]
+spliceai-cache = "spliceai_cache.cli:app"
+
+[tool.uv.workspace]
+members = [
+    ".",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.2.0",
+    "pytest>=8.0.0",
+]
