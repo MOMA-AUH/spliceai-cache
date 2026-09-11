@@ -41,6 +41,6 @@ spliceai-cache extract \
   --all-variants
 ```
 
-Use `--mask` instead of `--no-mask` for results produced with SpliceAI masking enabled. Re-ingesting the same variants is safe: existing rows are reused and their annotations are updated. Extracted records are biallelic and sorted by the contig order in the reference dictionary, then by position and alternate allele.
+Use `--mask` instead of `--no-mask` for results produced with SpliceAI masking enabled. Re-ingesting the same variants is safe: existing rows are reused and their annotations are updated.
 
-Pass `--all-variants` to both `ingest` and `extract` to retain and export variants that have no `SpliceAI` value. These records are exported without the `SpliceAI` INFO field. This makes the resulting VCF suitable for intersection with a cohort VCF when selecting variants that still need annotation. Without the option, ingestion and extraction retain their annotation-only behavior.
+Pass `--all-variants` to both `ingest` and `extract` to retain and export variants that have no `SpliceAI` value. These records are exported without the `SpliceAI` INFO field. Without the option, ingestion and extraction retain their annotation-only behavior.
