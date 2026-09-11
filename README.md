@@ -4,6 +4,19 @@
 
 The reference dictionary must contain `SN`, `LN`, and `M5` tags on every `@SQ` line. The annotation source is the file supplied to SpliceAI with `--annotation`; its SHA-256 digest is used as part of the cache identity.
 
+### Installation
+spliceai-cache supports Python 3.10 through 3.13.
+
+The simplest way to install spliceai-cache is through conda:
+```sh
+conda install -c MOMA-AUH spliceai-cache
+```
+
+Alternately, spliceai-cache can be installed from the [github repository](https://github.com/MOMA-AUH/spliceai-cache.git):
+```sh
+pip install git+https://github.com/MOMA-AUH/spliceai-cache.git
+```
+
 ## Usage
 
 ```console
