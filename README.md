@@ -41,6 +41,8 @@ spliceai-cache extract \
   --all-variants
 ```
 
-Use `--mask` instead of `--no-mask` for results produced with SpliceAI masking enabled. Re-ingesting the same variants is safe: existing rows are reused and their annotations are updated.
+Use `--mask` instead of `--no-mask` for results produced with SpliceAI masking enabled.
 
 Pass `--all-variants` to both `ingest` and `extract` to retain and export variants that have no `SpliceAI` value. These records are exported without the `SpliceAI` INFO field. Without the option, ingestion and extraction retain their annotation-only behavior.
+
+Re-ingesting the same variants is safe: existing rows are reused and their annotations are updated.
