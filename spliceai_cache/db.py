@@ -330,12 +330,16 @@ class SpliceAIConfig(SQLModel, table=True):
         annotation: str | Path,
         distance: int,
         mask: bool,
+        *,
+        require_match: bool = True,
     ) -> list["SpliceAIConfig"]:
         """Return configurations matching the supplied SpliceAI inputs."""
 
         reference = Reference.find(session, ref_dict)
         if reference is None or reference.id is None:
-            raise ValueError("Reference dictionary is not present in the cache")
+            if require_match:
+                raise ValueError("Reference dictionary is not present in the cache")
+            return []
 
         configs = session.exec(
             select(cls)
@@ -348,7 +352,7 @@ class SpliceAIConfig(SQLModel, table=True):
             )
             .order_by(cls.id)
         ).all()
-        if not configs:
+        if not configs and require_match:
             raise ValueError("No cache configuration matches the supplied inputs")
         return list(configs)
 

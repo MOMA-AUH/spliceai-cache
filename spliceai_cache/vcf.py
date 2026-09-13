@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from itertools import chain
 from pathlib import Path
 
 from pysam import VariantFile, VariantHeader
@@ -115,7 +116,12 @@ def _output_mode(output_path: str | Path) -> str:
     return "w"
 
 
-def _output_header(session: Session, config: object) -> VariantHeader:
+def _output_header(
+    session: Session,
+    config: object,
+    *,
+    include_spliceai: bool = True,
+) -> VariantHeader:
     from .db import Contig
 
     header = VariantHeader()
@@ -123,7 +129,20 @@ def _output_header(session: Session, config: object) -> VariantHeader:
         session, reference_id=config.reference_id
     ):
         header.contigs.add(contig.sn, length=contig.ln, md5=contig.md5)
-    header.add_line(config.info_field.header_line)
+    if include_spliceai:
+        header.add_line(config.info_field.header_line)
+    header.add_meta("source", value="spliceai-cache")
+    return header
+
+
+def _empty_output_header(ref_dict: str | Path) -> VariantHeader:
+    header = VariantHeader()
+    for contig in ContigTuple.from_path(ref_dict):
+        header.contigs.add(
+            contig["sn"],
+            length=contig["ln"],
+            md5=contig["md5"],
+        )
     header.add_meta("source", value="spliceai-cache")
     return header
 
@@ -150,20 +169,35 @@ def extract_vcf(
             annotation=annotation,
             distance=distance,
             mask=mask,
+            require_match=False,
         )
+        if not configs:
+            header = _empty_output_header(ref_dict)
+            with VariantFile(
+                str(output_path), mode=_output_mode(output_path), header=header
+            ):
+                pass
+            return 0
+
         header_config = SpliceAIConfig.newest_info_config(configs)
-        header = _output_header(session, header_config)
         rows = SpliceAIAnnotation.iter_for_configs(
             session,
             configs=configs,
             include_unannotated=all_variants,
+        )
+        first_row = next(rows, None)
+        header = _output_header(
+            session,
+            header_config,
+            include_spliceai=first_row is not None,
         )
 
         output_count = 0
         with VariantFile(
             str(output_path), mode=_output_mode(output_path), header=header
         ) as output_vcf:
-            for contig, pos, ref, alt, spliceai in rows:
+            output_rows = rows if first_row is None else chain((first_row,), rows)
+            for contig, pos, ref, alt, spliceai in output_rows:
                 output_record = output_vcf.new_record(
                     contig=contig,
                     start=pos - 1,

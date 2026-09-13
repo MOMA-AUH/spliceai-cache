@@ -7,7 +7,9 @@ import pytest
 from pysam import VariantFile
 from sqlalchemy import func
 from sqlmodel import Session, SQLModel, select
+from typer.testing import CliRunner
 
+from spliceai_cache.cli import app
 from spliceai_cache.db import (
     Contig,
     ContigOrder,
@@ -126,9 +128,59 @@ def test_ingest_is_idempotent_and_extracts_ordered_vcf(cache: CacheInputs) -> No
     )
 
 
-def test_extract_requires_matching_provenance(cache: CacheInputs) -> None:
-    with pytest.raises(ValueError, match="not present"):
-        cache.extract()
+def test_extract_writes_empty_vcf_when_configuration_is_not_cached(
+    cache: CacheInputs,
+) -> None:
+    assert cache.extract() == 0
+
+    with VariantFile(cache.output) as output:
+        assert tuple(output.header.contigs) == ("chr1", "chr2")
+        assert "SpliceAI" not in output.header.info
+        assert list(output) == []
+
+
+def test_extract_cli_reports_errors_without_a_traceback(tmp_path: Path) -> None:
+    result = CliRunner().invoke(
+        app,
+        [
+            "extract",
+            "--output",
+            str(tmp_path / "output.vcf"),
+            "--uri",
+            str(tmp_path / "cache.sqlite"),
+            "--dict",
+            str(tmp_path / "missing.dict"),
+            "--annotation",
+            str(tmp_path / "missing.txt"),
+            "--distance",
+            "50",
+            "--mask",
+        ],
+    )
+
+    assert result.exit_code == 1
+    assert "Error:" in result.output
+    assert "AttributeError" not in result.output
+
+
+def test_extract_writes_header_without_spliceai_for_empty_config(
+    cache: CacheInputs,
+) -> None:
+    empty_vcf = cache.input.with_name("empty.vcf")
+    empty_vcf.write_text(
+        "\n".join(
+            line for line in cache.input.read_text().splitlines() if line.startswith("#")
+        )
+        + "\n"
+    )
+    _config_id, cached_count = cache.ingest(input_path=empty_vcf)
+
+    assert cached_count == 0
+    assert cache.extract() == 0
+    with VariantFile(cache.output) as output:
+        assert tuple(output.header.contigs) == ("chr1", "chr2")
+        assert "SpliceAI" not in output.header.info
+        assert list(output) == []
 
 
 def test_all_variants_round_trip_includes_records_without_annotations(

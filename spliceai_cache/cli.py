@@ -62,7 +62,8 @@ def ingest(
             all_variants=all_variants,
         )
     except (OSError, SQLAlchemyError, ValueError, RuntimeError) as exc:
-        raise typer.ClickException(str(exc)) from exc
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
     item_name = "variants" if all_variants else "annotations"
     typer.echo(f"Cached {count} {item_name} (configuration {config_id})")
 
@@ -103,7 +104,8 @@ def extract(
             all_variants=all_variants,
         )
     except (OSError, SQLAlchemyError, ValueError, RuntimeError) as exc:
-        raise typer.ClickException(str(exc)) from exc
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
     item_name = "variants" if all_variants else "annotations"
     typer.echo(f"Exported {count} {item_name} to {output}")
 
